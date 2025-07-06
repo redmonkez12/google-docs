@@ -278,7 +278,18 @@
     max-width: 100%;
 
     &.ProseMirror-selectednode {
-      outline: 3px solid var(--purple);
+      @apply outline-blue-600;
+      outline-width: 3px;
+      outline-style: solid;
+    }
+  }
+
+  a {
+    @apply text-blue-600;
+    cursor: pointer;
+
+    &:hover {
+      @apply underline;
     }
   }
 }

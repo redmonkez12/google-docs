@@ -7,7 +7,7 @@ import { TaskItem } from "@tiptap/extension-task-item";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TableCell } from "@tiptap/extension-table-cell";
-import Highlight from '@tiptap/extension-highlight'
+import Highlight from "@tiptap/extension-highlight";
 import { Table } from "@tiptap/extension-table";
 import Image from "@tiptap/extension-image";
 import { ImageResize } from "tiptap-extension-resize-image";
@@ -16,6 +16,10 @@ import { Underline } from "@tiptap/extension-underline";
 import { FontFamily } from "@tiptap/extension-font-family";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
+import Link from "@tiptap/extension-link";
+import { TextAlign } from "@tiptap/extension-text-align";
+import { FontSizeExtension } from "@/extensions/font-size";
+import { LineHeightExtension } from "@/extensions/line-height";
 
 export const Editor = () => {
     const setEditor = useEditorStore(state => state.setEditor);
@@ -53,7 +57,20 @@ export const Editor = () => {
         },
         extensions: [
             StarterKit,
+            FontSizeExtension,
+            LineHeightExtension.configure({
+                types: ["heading", "paragraph"],
+                defaultLineHeight: "normal",
+            }),
+            TextAlign.configure({
+                types: ["heading", "paragraph"],
+            }),
             FontFamily,
+            Link.configure({
+                openOnClick: false,
+                autolink: true,
+                defaultProtocol: "https",
+            }),
             TextStyle,
             Underline,
             TaskList,
