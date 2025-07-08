@@ -3,9 +3,31 @@
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { templates } from "@/constants";
 import { cn } from "@/lib/utils";
+import { useMutation } from "convex/react";
+import { useRouter } from "next/navigation";
+import { api } from "../../../convex/_generated/api";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export const TemplateGallery = () => {
-    const isCreating = false;
+    const router = useRouter();
+    const create = useMutation(api.documents.create);
+    const [isCreating, setIsCreating] = useState(false);
+
+    const onTemplateClick = async (title: string, initialContent: string) => {
+        setIsCreating(true);
+        create({
+            title,
+            initialContent,
+        })
+        .catch(() => toast.error("Something went wrong"))
+        .then((documentId) => {
+            toast.success("Document removed")
+            router.push(`/documents/${documentId}`);
+        }).finally(() => {
+            setIsCreating(false);
+        });
+    }
 
     return (
         <div className="bg-[#f1f3f4]">
@@ -24,7 +46,7 @@ export const TemplateGallery = () => {
                                 <div className={cn("aspect-[3/4] flex flex-col gap-y-2.5", isCreating && "pointer-events-none opacity-50")}>
                                     <button
                                         disabled={isCreating}
-                                        onClick={() => { }}
+                                        onClick={() => onTemplateClick(template.label, "")}
                                         style={{
                                             backgroundImage: `url(${template.imageUrl})`,
                                             backgroundSize: "cover",
