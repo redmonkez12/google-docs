@@ -22,7 +22,7 @@ export const TemplateGallery = () => {
         })
         .catch(() => toast.error("Something went wrong"))
         .then((documentId) => {
-            toast.success("Document removed")
+            toast.success("Document created")
             router.push(`/documents/${documentId}`);
         }).finally(() => {
             setIsCreating(false);

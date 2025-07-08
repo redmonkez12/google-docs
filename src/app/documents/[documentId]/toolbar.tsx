@@ -2,14 +2,18 @@
 
 import { cn } from "@/lib/utils";
 import {
-    AlignCenterIcon, AlignJustifyIcon,
+    AlignCenterIcon,
+    AlignJustifyIcon,
     AlignLeftIcon,
     BoldIcon,
     ChevronDownIcon,
     HighlighterIcon,
     ImageIcon,
     ItalicIcon,
-    Link2Icon, ListCollapseIcon, ListIcon, ListOrderedIcon,
+    Link2Icon,
+    ListCollapseIcon,
+    ListIcon,
+    ListOrderedIcon,
     ListTodoIcon,
     LucideIcon,
     MessageSquarePlusIcon, MinusIcon, PlusIcon,
@@ -19,7 +23,8 @@ import {
     SearchIcon,
     SpellCheckIcon,
     UnderlineIcon,
-    Undo2Icon, UploadIcon
+    Undo2Icon,
+    UploadIcon,
 } from "lucide-react";
 import { FC, useState } from "react";
 import { useEditorStore } from "@/store/use-editor-store";
@@ -585,9 +590,8 @@ export const Toolbar = () => {
             {
                 label: "Comment",
                 icon: MessageSquarePlusIcon,
-                isActive: false,
-                onClick: () => {
-                },
+                isActive: editor?.isActive("liveBlocksCommentMark"),
+                onClick: () => editor?.chain().focus().addPendingComment().run(),
             },
             {
                 label: "List Todo",

@@ -1,7 +1,9 @@
-﻿import React, { FC } from "react";
+﻿
+import React, { FC } from "react";
 import { Editor } from "@/app/documents/[documentId]/editor";
 import { Toolbar } from "@/app/documents/[documentId]/toolbar";
 import { Navbar } from "@/app/documents/[documentId]/navbar";
+import { Room } from "./room";
 
 interface DocumentIdPageProps {
     params: Promise<{ documentId: string }>;
@@ -17,7 +19,9 @@ const DocumentIdPage: FC<DocumentIdPageProps> = async ({ params }) => {
                 <Toolbar/>
             </div>
             <div className="pt-[114px] print:pt-0">
-                <Editor/>
+                <Room>
+                    <Editor/>
+                </Room>
             </div>
         </div>
     );

@@ -10,6 +10,7 @@ import { TableCell } from "@tiptap/extension-table-cell";
 import Highlight from "@tiptap/extension-highlight";
 import { Table } from "@tiptap/extension-table";
 import Image from "@tiptap/extension-image";
+import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
 import { ImageResize } from "tiptap-extension-resize-image";
 import { useEditorStore } from "@/store/use-editor-store";
 import { Underline } from "@tiptap/extension-underline";
@@ -21,8 +22,10 @@ import { TextAlign } from "@tiptap/extension-text-align";
 import { FontSizeExtension } from "@/extensions/font-size";
 import { LineHeightExtension } from "@/extensions/line-height";
 import { Ruler } from "@/app/documents/[documentId]/ruler";
+import { Threads } from "./theads";
 
 export const Editor = () => {
+    const liveblocks = useLiveblocksExtension();
     const setEditor = useEditorStore(state => state.setEditor);
 
     const editor = useEditor({
@@ -58,7 +61,10 @@ export const Editor = () => {
             },
         },
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                history: false,
+            }),
+            liveblocks,
             FontSizeExtension,
             LineHeightExtension.configure({
                 types: ["heading", "paragraph"],
@@ -101,6 +107,7 @@ export const Editor = () => {
             <Ruler/>
             <div className="min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0">
                 <EditorContent editor={editor}/>
+                <Threads editor={editor}/>
             </div>
         </div>
     );
