@@ -1,13 +1,13 @@
 "use client";
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { templates } from "@/constants";
 import { cn } from "@/lib/utils";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
+import { templates } from "@/constants/templates";
 
 export const TemplateGallery = () => {
     const router = useRouter();
@@ -46,7 +46,7 @@ export const TemplateGallery = () => {
                                 <div className={cn("aspect-[3/4] flex flex-col gap-y-2.5", isCreating && "pointer-events-none opacity-50")}>
                                     <button
                                         disabled={isCreating}
-                                        onClick={() => onTemplateClick(template.label, "")}
+                                        onClick={() => onTemplateClick(template.label, template.initialContent)}
                                         style={{
                                             backgroundImage: `url(${template.imageUrl})`,
                                             backgroundSize: "cover",

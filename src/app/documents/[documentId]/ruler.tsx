@@ -1,143 +1,152 @@
-﻿import { FaCaretDown } from "react-icons/fa";
-import { FC, useRef, useState } from "react";
+﻿import { useMutation, useStorage } from "@liveblocks/react/suspense";
+import { useRef, useState } from "react";
+import { FaCaretDown } from "react-icons/fa";
 
-const markers = Array.from({ length: 83 }, (_, i) => i);
+import { editorMargin, editorRulerMarkers, editorRulerMarkersMargin, editorWidth } from "@/config/editor";
+
+const markers = Array.from({ length: editorRulerMarkers }, (_, i) => i);
 
 export const Ruler = () => {
-    const [leftMargin, setLeftMargin] = useState(56);
-    const [rightMargin, setRightMargin] = useState(56);
+  const rulerRef = useRef<HTMLDivElement>(null);
 
-    const [isDraggingLeft, setIsDraggingLeft] = useState(false);
-    const [isDraggingRight, setIsDraggingRight] = useState(false);
-    const rulerRef = useRef<HTMLDivElement>(null);
+  const leftMargin = useStorage((root) => root.leftMargin ?? editorMargin);
+  const setLeftMargin = useMutation(({ storage }, position: number) => storage.set("leftMargin", position), []);
 
-    const handleLeftMouseDown = () => {
-        setIsDraggingLeft(true);
-    }
+  const rightMargin = useStorage((root) => root.rightMargin ?? editorMargin);
+  const setRightMargin = useMutation(({ storage }, position: number) => storage.set("rightMargin", position), []);
 
-    const handleRightMouseDown = () => {
-        setIsDraggingRight(true);
-    }
+  const [isDraggingLeft, setIsDraggingLeft] = useState(false);
+  const [isDraggingRight, setIsDraggingRight] = useState(false);
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-        const PAGE_WIDTH = 816;
-        const MINIMUM_SPACE = 100;
+  const handleLeftMouseDown = () => {
+    setIsDraggingLeft(true);
+  };
 
-        if ((isDraggingLeft || isDraggingRight) && rulerRef.current) {
-            const container = rulerRef.current.querySelector("#ruler-container");
-            if (container) {
-                const containerRect = container.getBoundingClientRect();
-                const relativeX = e.clientX - containerRect.left;
-                const rawPosition = Math.max(0, Math.min(PAGE_WIDTH, relativeX));
+  const handleRightMouseDown = () => {
+    setIsDraggingRight(true);
+  };
 
-                if (isDraggingLeft) {
-                    const maxLeftPosition = PAGE_WIDTH - rightMargin - MINIMUM_SPACE;
-                    const newLeftPosition = Math.min(rawPosition, maxLeftPosition);
-                    setLeftMargin(newLeftPosition);
-                } else if (isDraggingRight) {
-                    const maxRightPosition = PAGE_WIDTH - (leftMargin + MINIMUM_SPACE);
-                    const newRightPosition = Math.max(PAGE_WIDTH - rawPosition, 0);
-                    const constrainedRightPosition = Math.min(newRightPosition, maxRightPosition);
-                    setRightMargin(constrainedRightPosition);
-                }
-            }
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if ((isDraggingLeft || isDraggingRight) && rulerRef.current) {
+      const container = rulerRef.current.querySelector("#ruler-container");
+
+      if (container) {
+        const containerRect = container.getBoundingClientRect();
+        const relativeX = e.clientX - containerRect.left;
+        const rawPosition = Math.max(0, Math.min(editorWidth, relativeX));
+
+        if (isDraggingLeft) {
+          const maxLeftPosition = editorWidth - rightMargin - editorRulerMarkersMargin;
+          const newLeftPosition = Math.min(rawPosition, maxLeftPosition);
+
+          setLeftMargin(newLeftPosition);
+        } else if (isDraggingRight) {
+          const maxRightPosition = editorWidth - (leftMargin + editorRulerMarkersMargin);
+          const newRightPosition = Math.max(editorWidth - rawPosition, 0);
+          const constrainedRightPosition = Math.min(newRightPosition, maxRightPosition);
+
+          setRightMargin(constrainedRightPosition);
         }
+      }
     }
+  };
 
-    const handleMouseUp = () => {
-        setIsDraggingLeft(false);
-        setIsDraggingRight(false);
-    }
+  const handleMouseUp = () => {
+    setIsDraggingLeft(false);
+    setIsDraggingRight(false);
+  };
 
-    const handleLeftDoubleClick = () => {
-        setLeftMargin(56);
-    }
+  const handleLeftDoubleClick = () => {
+    setLeftMargin(editorMargin);
+  };
 
-    const handleRightDoubleClick = () => {
-        setRightMargin(56);
-    }
+  const handleRightDoubleClick = () => {
+    setRightMargin(editorMargin);
+  };
 
-    return (
-        <div
-            ref={rulerRef}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            className="w-[816px] mx-auto h-6 border-b border-gray-300 flex items-end relative select-none print:hidden">
-            <div id="ruler-container" className="w-full h-full relative">
-                <Marker
-                    position={leftMargin}
-                    isLeft={true}
-                    isDragging={isDraggingLeft}
-                    onMouseDown={handleLeftMouseDown}
-                    onDoubleClick={handleLeftDoubleClick}
-                />
-                <Marker
-                    position={rightMargin}
-                    isLeft={false}
-                    isDragging={isDraggingRight}
-                    onMouseDown={handleRightMouseDown}
-                    onDoubleClick={handleRightDoubleClick}
-                />
-                <div className="absolute inset-x-0 bottom-0 h-full">
-                    <div className="relative h-full w-[816px]">
-                        {markers.map((marker) => {
-                            const position = (marker * 816) / 82;
+  return (
+    <div
+      ref={rulerRef}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      className="relative mx-auto flex h-6 select-none items-end border-b border-gray-300 print:hidden"
+      style={{
+        width: editorWidth,
+      }}
+    >
+      <div id="ruler-container" className="relative size-full">
+        <Maker
+          position={leftMargin}
+          isLeft
+          isDragging={isDraggingLeft}
+          onMouseDown={handleLeftMouseDown}
+          onDoubleClick={handleLeftDoubleClick}
+        />
+        <Maker
+          position={rightMargin}
+          isLeft={false}
+          isDragging={isDraggingRight}
+          onMouseDown={handleRightMouseDown}
+          onDoubleClick={handleRightDoubleClick}
+        />
 
-                            return (
-                                <div
-                                    key={marker}
-                                    className="absolute bottom-0"
-                                    style={{ left: `${position}px` }}>
-                                    {marker % 10 === 0 && (
-                                        <>
-                                            <div className="absolute bottom-0 w-[1px] h-2 bg-neutral-500"/>
-                                            <span className="absolute bottom-2 text-[10px] text-neutral-500 transform -translate-x-1/2">{marker / 10 + 1}</span>
-                                        </>
-                                    )}
-                                    {marker % 5 === 0 && marker % 10 !== 0 && (
-                                        <div className="absolute bottom-0 w-[1px] h-1.5 bg-neutral-500"/>
-                                    )}
-                                    {marker % 5 !== 0 && (
-                                        <div className="absolute bottom-0 w-[1px] h-1 bg-neutral-500"/>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
+        <div className="absolute inset-x-0 bottom-0 h-full">
+          <div className="relative h-full w-[816px]">
+            {markers.map((marker) => {
+              const position = (marker * editorWidth) / editorRulerMarkers - 1;
+
+              return (
+                <div
+                  key={marker}
+                  className="absolute bottom-0"
+                  style={{
+                    left: `${position}px`,
+                  }}
+                >
+                  {marker % 10 === 0 && (
+                    <>
+                      <div className="absolute bottom-0 h-2 w-px bg-neutral-500" />
+                      <span className="absolute bottom-2 -translate-x-1/2 transform text-[10px] text-neutral-500">{marker / 10 + 1}</span>
+                    </>
+                  )}
+
+                  {marker % 5 === 0 && marker % 10 !== 0 && <div className="absolute bottom-0 h-1.5 w-px bg-neutral-500" />}
+                  {marker % 5 !== 0 && <div className="absolute bottom-0 h-1 w-px bg-neutral-500" />}
                 </div>
-            </div>
+              );
+            })}
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
-interface MarkerProps {
-    position: number;
-    isLeft: boolean;
-    isDragging: boolean;
-    onMouseDown(): void;
-    onDoubleClick(): void;
+interface MakerProps {
+  position: number;
+  isLeft: boolean;
+  isDragging: boolean;
+  onMouseDown: () => void;
+  onDoubleClick: () => void;
 }
 
-const Marker: FC<MarkerProps> = ({
-                                     isLeft,
-                                     isDragging,
-                                     onMouseDown,
-                                     onDoubleClick,
-                                     position
-                                 }) => {
-    return (
-        <div
-            className="absolute top-0 w-4 h-full cursor-ew-resize z-[5] group -ml-2"
-            style={{ [isLeft ? "left" : "right"]: `${position}px` }}
-            onMouseDown={onMouseDown}
-            onDoubleClick={onDoubleClick}
-        >
-            <FaCaretDown className="absolute left-1/2 top-0 h-full fill-blue-500 transform -translate-x-1/2" />
-            <div className="absolute left-1/4 top-4 transform -translate-x-1/2 transition-opacity"
-                 style={{ height: "100vh", width: "1px", transform: "scaleX(0.5)", backgroundColor: "#3b72f6", display: isDragging ? "block" : "none" }}></div>
-        </div>
-    );
-};
+const Maker = ({ isDragging, isLeft, onDoubleClick, onMouseDown, position }: MakerProps) => {
+  return (
+    <div
+      className="group absolute top-0 z-[5] -ml-2 h-full w-4 cursor-ew-resize"
+      style={{ [isLeft ? "left" : "right"]: `${position}px` }}
+      onMouseDown={onMouseDown}
+      onDoubleClick={onDoubleClick}
+    >
+      <FaCaretDown className="trasnform absolute left-1/2 top-0 h-full -translate-x-1/2 fill-blue-500" />
 
-export default Ruler;
+      <div
+        className="absolute left-1/2 top-4 h-screen w-px -translate-x-1/2 scale-x-50 transform bg-blue-500"
+        style={{
+          display: isDragging ? "block" : "none",
+        }}
+      />
+    </div>
+  );
+};
